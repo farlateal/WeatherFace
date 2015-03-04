@@ -1,0 +1,32 @@
+{
+    "appKeys": {
+        "KEY_CONDITIONS": 1,
+        "KEY_TEMPERATURE": 0
+    },
+    "capabilities": [
+        "location"
+    ],
+    "companyName": "Pebble",
+    "longName": "WeatherFace",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/cloud.png",
+                "name": "IMAGE_LIGHT_CLOUD",
+                "type": "png"
+            }
+        ]
+    },
+    "sdkVersion": "3",
+    "shortName": "WeatherFace",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "29cd47e2-41ca-4024-b500-7f1e6372b5fe",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
