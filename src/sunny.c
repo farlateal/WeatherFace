@@ -9,28 +9,39 @@ static uint8_t sunnygfx_first = 1;
 static void sunnygfx_day_update(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorVividCerulean);
   graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
+  
+  int8_t i;
+  for (i = 2; i >= 0; i--){
+    switch(i){
+      case 0: graphics_context_set_fill_color(ctx, GColorOrange); break;
+      case 1: graphics_context_set_fill_color(ctx, GColorChromeYellow); break;
+      case 2: graphics_context_set_fill_color(ctx, GColorYellow); break;
+    }
+    graphics_fill_circle(ctx, GPoint(72 + (rand()%5), -30 + (rand()%5)), 90 + (i*10) + (rand()%5));
+  }
     
   graphics_context_set_fill_color(ctx, GColorYellow);
   graphics_context_set_stroke_color(ctx, GColorIcterine);
   graphics_fill_circle(ctx, GPoint(72, -30), 80);
     
-  int8_t i;
+  return;
+
   for (i = 0; i < 10; i++){
-  if (i == 9){
-    if (sunnygfx_offset > 0) {
-      graphics_context_set_stroke_color(ctx, GColorInchworm);
+    if (i == 9){
+      if (sunnygfx_offset > 0) {
+        graphics_context_set_stroke_color(ctx, GColorInchworm);
+      }
+      if (sunnygfx_offset > 1) {
+        graphics_context_set_stroke_color(ctx, GColorMintGreen);
+      }
+      if (sunnygfx_offset > 2) {
+        graphics_context_set_stroke_color(ctx, GColorMediumAquamarine);
+      }
+      if (sunnygfx_offset > 3) {
+        graphics_context_set_stroke_color(ctx, GColorCyan);
+      }
     }
-    if (sunnygfx_offset > 1) {
-      graphics_context_set_stroke_color(ctx, GColorMintGreen);
-    }
-    if (sunnygfx_offset > 2) {
-      graphics_context_set_stroke_color(ctx, GColorMediumAquamarine);
-    }
-    if (sunnygfx_offset > 3) {
-      graphics_context_set_stroke_color(ctx, GColorCyan);
-    }
-  }
-  graphics_draw_circle(ctx, GPoint(72, -30), 80 + (i * 10)+sunnygfx_offset*2);
+    graphics_draw_circle(ctx, GPoint(72, -30), 80 + (i * 10)+sunnygfx_offset*2);
   }
   sunnygfx_offset++;
   if (sunnygfx_offset > 4) {
