@@ -21,7 +21,7 @@ static uint8_t percent = 0;
 bool charging = false;
 bool bt_connected = true;
 
-static uint16_t demo_ctr = 1; //demo mode, use 1 to activate
+static uint16_t demo_ctr = 0; //demo mode, use 1 to activate
 
 static char conditions_buffer[32];
 
@@ -63,9 +63,11 @@ static void update_time() {
 static void update_layer_fg(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack); //circle border
   graphics_fill_circle(ctx, GPoint(72, 84), 62);
+  //graphics_fill_circle_antialiased(ctx, GPoint(72, 84), 62, GColorBlack);
   
   graphics_context_set_fill_color(ctx, GColorWhite); //circle
   graphics_fill_circle(ctx, GPoint(72, 84), 60);
+  //graphics_fill_circle_antialiased(ctx, GPoint(72, 84), 60, GColorWhite);
   
   //vertical bars
   graphics_context_set_stroke_color(ctx, GColorBlack); 
@@ -92,6 +94,7 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
   graphics_fill_circle(ctx, GPoint(72, 84), 55);
   graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
   
+  //goto test;
   if (demo_ctr > 0){
     if (demo_ctr < DEMO_FRAMES){
       raingfx_update(layer, ctx);
@@ -127,8 +130,10 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     cloudygfx_update(layer, ctx, 0);
   }else if (strcmp("02n",conditions_buffer) == 0){
     cloudygfx_update(layer, ctx, 3);
-  }else if (strcmp("03d",conditions_buffer) == 0 || strcmp("03n",conditions_buffer) == 0){
+  }else if (strcmp("03d",conditions_buffer) == 0){
     cloudygfx_update(layer, ctx, 0);
+  }else if (strcmp("03n",conditions_buffer) == 0){
+    cloudygfx_update(layer, ctx, 3);
   }else if (strcmp("04d",conditions_buffer) == 0 || strcmp("04n",conditions_buffer) == 0){
     cloudygfx_update(layer, ctx, 1);
   }else if (strcmp("09d",conditions_buffer) == 0 || strcmp("09n",conditions_buffer) == 0){
@@ -143,9 +148,10 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     mistgfx_update(layer, ctx);
   }
   
+  //test:
   //mistgfx_update(layer, ctx); //mist
   //raingfx_update(layer, ctx); //rain
-  //sunnygfx_update(layer, ctx, 0); //clear day
+  sunnygfx_update(layer, ctx, 0); //clear day
   //sunnygfx_update(layer, ctx, 1); //clear night
   //snowgfx_update(layer, ctx); //snow
   //cloudygfx_update(layer, ctx, 0); //light clouds
@@ -275,6 +281,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   // Assemble full string and display
   snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s", temperature_buffer);
   text_layer_set_text(s_weather_layer, weather_layer_buffer);
+  layer_mark_dirty(s_fg_layer);
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -292,6 +299,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void fg_invalidate(struct tm *tick_time, TimeUnits units_changed) {
   if (tick_time->tm_sec % 60 == 0){
     update_time();
+    layer_mark_dirty(s_fg_layer);
   }
   //layer_mark_dirty(s_fg_layer);
   layer_mark_dirty(s_bg_layer);

@@ -12,7 +12,7 @@ static void cloudygfx_gencloud(){
   for (i = 0; i < CLOUDYGFX_NUM_CLOUDS; i++){
     uint8_t x = rand() % 144;
     uint8_t y = rand() % 168;
-    cloudygfx_speeds[i] = 1 + (rand()%5);
+    cloudygfx_speeds[i] = 3 + (rand()%7);
     //cloudygfx_speeds[i] = 5;
     uint8_t j;
     for (j = 0; j < CLOUDYGFX_CLOUD_CIRCLES; j++){
