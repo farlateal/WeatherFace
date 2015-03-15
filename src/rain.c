@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "antialiasing.h"
 
 static void raingfx_update(Layer *layer, GContext *ctx) {
   GColor8 bkgcolor = GColorCobaltBlue;
@@ -12,6 +13,6 @@ static void raingfx_update(Layer *layer, GContext *ctx) {
   for(i = 0; i < 40; i++){
     uint8_t x = rand() % 144;
     uint8_t y = rand() % 168;
-    graphics_draw_line(ctx, GPoint(x, y), GPoint(x + 8, y + 10));
+    graphics_draw_line_antialiased(ctx, GPoint(x, y), GPoint(x + 8, y + 10), raincolor);
   }
 }
