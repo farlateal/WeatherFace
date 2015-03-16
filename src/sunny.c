@@ -41,7 +41,7 @@ static void sunnygfx_night_update(Layer *layer, GContext *ctx) {
     graphics_context_set_fill_color(ctx, GColorLightGray);
     if (rand()%10 == 0){
       graphics_context_set_fill_color(ctx, GColorYellow);
-      graphics_fill_circle(ctx, sunnygfx_stars[i], 2);
+      graphics_fill_circle(ctx, sunnygfx_stars[i], 3);
       //graphics_fill_circle_antialiased(ctx, sunnygfx_stars[i], 3, GColorYellow);
     }else{
       graphics_fill_circle(ctx, sunnygfx_stars[i], 2);
