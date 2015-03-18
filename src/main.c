@@ -151,7 +151,7 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
   //test:
   //mistgfx_update(layer, ctx); //mist
   //raingfx_update(layer, ctx); //rain
-  sunnygfx_update(layer, ctx, 0); //clear day
+  //sunnygfx_update(layer, ctx, 0); //clear day
   //sunnygfx_update(layer, ctx, 1); //clear night
   //snowgfx_update(layer, ctx); //snow
   //cloudygfx_update(layer, ctx, 0); //light clouds
