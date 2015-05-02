@@ -144,8 +144,10 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     cloudygfx_update(layer, ctx, 2);
   }else if (strcmp("13d",conditions_buffer) == 0 || strcmp("13n",conditions_buffer) == 0){
     snowgfx_update(layer, ctx);
-  }else{
+  }else if (strcmp("50d",conditions_buffer) == 0 || strcmp("50n",conditions_buffer) == 0){
     mistgfx_update(layer, ctx);
+  }else{
+    //fallback gfx
   }
   
   //test:

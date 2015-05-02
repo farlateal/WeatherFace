@@ -44,6 +44,7 @@ def build(ctx):
 
     for p in ctx.env.TARGET_PLATFORMS:
         ctx.set_env(ctx.all_envs[p])
+        ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf='{}/pebble-app.elf'.format(p)
         ctx.pbl_program(source=ctx.path.ant_glob('src/**/*.c'),
         target=app_elf)
@@ -56,5 +57,6 @@ def build(ctx):
         else:
             binaries.append({'platform': p, 'app_elf': app_elf})
 
+    ctx.set_group('bundle')
     ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
     
