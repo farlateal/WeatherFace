@@ -27,7 +27,6 @@ static char conditions_buffer[32];
 
 char* months[] = {"jan ", "feb ", "mar ", "apr ", "may ", "jun ", "jul ", "aug ", "sep ", "oct ", "nov ", "dec "};
 char* days[] = {"sun ", "mon ", "tue ", "wed ", "thu ", "fri ", "sat "};
-static GFont s_weather_font;
 
 static void update_time() {
   // Get a tm structure
@@ -341,8 +340,15 @@ static void init() {
 }
 
 static void deinit() {
-  // Destroy Window
   window_destroy(s_main_window);
+  
+  layer_destroy(s_fg_layer);
+  layer_destroy(s_bg_layer);
+  
+  text_layer_destroy(s_time_layer);
+  text_layer_destroy(s_date_layer);
+  text_layer_destroy(s_weather_layer);
+  text_layer_destroy(s_bt_layer);
 }
 
 int main(void) {
