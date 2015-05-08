@@ -6,11 +6,17 @@
     "capabilities": [
         "location"
     ],
-    "companyName": "Pebble",
-    "longName": "WeatherFace",
+    "companyName": "Sebastian Fabian",
+    "longName": "TickTockWeather",
     "projectType": "native",
     "resources": {
         "media": [
+            {
+                "file": "images/icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_APP_ICON",
+                "type": "png"
+            },
             {
                 "file": "images/cloud.png",
                 "name": "IMAGE_LIGHT_CLOUD",
@@ -19,13 +25,13 @@
         ]
     },
     "sdkVersion": "3",
-    "shortName": "WeatherFace",
+    "shortName": "TickTockWeather",
     "targetPlatforms": [
         "basalt"
     ],
-    "uuid": "29cd47e2-41ca-4024-b500-7f1e6372b5fe",
+    "uuid": "29cd47e2-41ca-4024-b500-7f1e6382b5fe",
     "versionCode": 1,
-    "versionLabel": "1.0",
+    "versionLabel": "1.1",
     "watchapp": {
         "watchface": true
     }

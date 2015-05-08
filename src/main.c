@@ -4,6 +4,7 @@
 #include <snow.c>
 #include <cloudy.c>
 #include <mist.c>
+#include <unknown.c>
   
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
@@ -21,9 +22,14 @@ static uint8_t percent = 0;
 bool charging = false;
 bool bt_connected = true;
 
+static int utransition;
+
 static uint16_t demo_ctr = 0; //demo mode, use 1 to activate
 
 static char conditions_buffer[32];
+static char temperature_buffer[8];
+#define P_CBUFFER (123411)
+#define P_TBUFFER (123412)
 
 char* months[] = {"jan ", "feb ", "mar ", "apr ", "may ", "jun ", "jul ", "aug ", "sep ", "oct ", "nov ", "dec "};
 char* days[] = {"sun ", "mon ", "tue ", "wed ", "thu ", "fri ", "sat "};
@@ -60,28 +66,25 @@ static void update_time() {
 }
 
 static void update_layer_fg(Layer *layer, GContext *ctx) {
-  graphics_context_set_fill_color(ctx, GColorBlack); //circle border
-  graphics_fill_circle(ctx, GPoint(72, 84), 62);
-  //graphics_fill_circle_antialiased(ctx, GPoint(72, 84), 62, GColorBlack);
+  graphics_context_set_fill_color(ctx, GColorBlack); //border
+  //graphics_fill_circle(ctx, GPoint(72, 84), 62);
   
-  graphics_context_set_fill_color(ctx, GColorWhite); //circle
-  graphics_fill_circle(ctx, GPoint(72, 84), 60);
-  //graphics_fill_circle_antialiased(ctx, GPoint(72, 84), 60, GColorWhite);
+  graphics_fill_rect(ctx, GRect(18,53,144-36,168-106), 10, GCornersAll);
   
-  //vertical bars
-  graphics_context_set_stroke_color(ctx, GColorBlack); 
-  graphics_draw_line(ctx, GPoint(42,50), GPoint(42, 53));
-  graphics_draw_line(ctx, GPoint(62,50), GPoint(62, 53));
-  graphics_draw_line(ctx, GPoint(82,50), GPoint(82, 53));
-  graphics_draw_line(ctx, GPoint(102,50), GPoint(102, 53));
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  //graphics_fill_circle(ctx, GPoint(72, 84), 60); //circle
+  
+  graphics_fill_rect(ctx, GRect(20,55,144-40,168-110), 10, GCornersAll);
   
   //battery bar
+  uint8_t bar_length = (percent / 5) * 4;
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(31,49,82,7), 2, GCornersAll);
+  graphics_context_set_fill_color(ctx, GColorWhite);
   if (charging){
-    graphics_context_set_stroke_color(ctx, GColorGreen); 
+    graphics_context_set_fill_color(ctx, GColorGreen); 
   }
-  uint8_t bar_length = (percent / 5) * 3;
-  graphics_draw_line(ctx, GPoint(42,55), GPoint(42 + bar_length, 55));
-  
+  graphics_fill_rect(ctx, GRect(32,50,bar_length,5), 2, GCornersAll);
   text_layer_set_text(s_bt_layer, "");
   if (!bt_connected){
     text_layer_set_text(s_bt_layer, "no bt");
@@ -146,7 +149,12 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
   }else if (strcmp("50d",conditions_buffer) == 0 || strcmp("50n",conditions_buffer) == 0){
     mistgfx_update(layer, ctx);
   }else{
-    //fallback gfx
+    utransition = 35;
+  }
+  
+  if (utransition > 0){
+    unknowngfx_update(layer, ctx, utransition);
+    utransition = utransition - 5;
   }
   
   //test:
@@ -169,7 +177,7 @@ static void main_window_load(Window *window) {
   text_layer_set_text(s_time_layer, "00:00");
   
   // Create date TextLayer
-  s_date_layer = text_layer_create(GRect(0, 95, 144, 75));
+  s_date_layer = text_layer_create(GRect(24, 89, 144, 75));
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorBlack);
   text_layer_set_text(s_date_layer, "mon jan 1");
@@ -188,10 +196,11 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_bt_layer, GTextAlignmentCenter);
 
   //Apply to TextLayer
-  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  //text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_LIGHT));
+  text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_LECO_38_BOLD_NUMBERS));
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
   text_layer_set_font(s_date_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-  text_layer_set_text_alignment(s_date_layer, GTextAlignmentCenter);
+  text_layer_set_text_alignment(s_date_layer, GTextAlignmentLeft);
 
   // Add it as a child layer to the Window's root layer
   layer_add_child(window_get_root_layer(window), s_bg_layer);
@@ -201,11 +210,11 @@ static void main_window_load(Window *window) {
   layer_add_child(s_fg_layer, text_layer_get_layer(s_bt_layer));
   
   // Create temperature Layer
-  s_weather_layer = text_layer_create(GRect(0, 115, 144, 25));
+  s_weather_layer = text_layer_create(GRect(0, 89, 144-24, 25));
   text_layer_set_background_color(s_weather_layer, GColorClear);
   text_layer_set_text_color(s_weather_layer, GColorBlack);
-  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentCenter);
-  text_layer_set_text(s_weather_layer, "loading...");
+  text_layer_set_text_alignment(s_weather_layer, GTextAlignmentRight);
+  text_layer_set_text(s_weather_layer, "wait");
   
   text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
@@ -215,12 +224,13 @@ static void main_window_load(Window *window) {
 }
 
 static void main_window_unload(Window *window) {
-  // Destroy TextLayer
+  layer_destroy(s_fg_layer);
+  layer_destroy(s_bg_layer);
+  
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_date_layer);
-  
-  // Destroy weather elements
   text_layer_destroy(s_weather_layer);
+  text_layer_destroy(s_bt_layer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -254,7 +264,6 @@ void bt_handler(bool connected) {
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   // Store incoming information
-  static char temperature_buffer[8];
   static char weather_layer_buffer[32];
   
   // Read first item
@@ -337,18 +346,17 @@ static void init() {
   
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  
+  if (persist_exists(P_TBUFFER)) {
+    persist_read_string(P_CBUFFER, conditions_buffer, sizeof(conditions_buffer));
+    persist_read_string(P_TBUFFER, temperature_buffer, sizeof(temperature_buffer));
+  }
 }
 
 static void deinit() {
+  persist_write_string(P_CBUFFER, conditions_buffer);
+  persist_write_string(P_TBUFFER, temperature_buffer);
   window_destroy(s_main_window);
-  
-  layer_destroy(s_fg_layer);
-  layer_destroy(s_bg_layer);
-  
-  text_layer_destroy(s_time_layer);
-  text_layer_destroy(s_date_layer);
-  text_layer_destroy(s_weather_layer);
-  text_layer_destroy(s_bt_layer);
 }
 
 int main(void) {
