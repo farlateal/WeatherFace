@@ -51,6 +51,10 @@ static void update_time() {
     strftime(buffer, sizeof("00:00"), "%I:%M", tick_time);
   }
   
+  //for screenshot purposes
+  //strftime(buffer, sizeof("00:00"), "11:32", tick_time);
+  //light_enable(true);
+  
   // Display this time on the TextLayer
   text_layer_set_text(s_time_layer, buffer);
   
@@ -69,12 +73,12 @@ static void update_layer_fg(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack); //border
   //graphics_fill_circle(ctx, GPoint(72, 84), 62);
   
-  graphics_fill_rect(ctx, GRect(18,53,144-36,168-106), 10, GCornersAll);
+  graphics_fill_rect(ctx, GRect(14,53,144-28,168-106), 10, GCornersAll);
   
   graphics_context_set_fill_color(ctx, GColorWhite);
   //graphics_fill_circle(ctx, GPoint(72, 84), 60); //circle
   
-  graphics_fill_rect(ctx, GRect(20,55,144-40,168-110), 10, GCornersAll);
+  graphics_fill_rect(ctx, GRect(16,55,144-32,168-110), 10, GCornersAll);
   
   //battery bar
   uint8_t bar_length = (percent / 5) * 4;
@@ -274,7 +278,13 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Which key was received?
     switch(t->key) {
     case KEY_TEMPERATURE:
-      snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
+      if(clock_is_24h_style() == false) { // I'll just go ahead and presume you want fahrenheit if you want 12h :)
+        int32_t temp = (int)t->value->int32;
+        int32_t fahrenheit = (int)((float)temp * (9.0/5.0) + 32.0);
+        snprintf(temperature_buffer, sizeof(temperature_buffer), "%dF", (int)fahrenheit);
+      }else{
+        snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
+      }
       break;
     case KEY_CONDITIONS:
       snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
