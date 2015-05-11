@@ -25,9 +25,11 @@ bool bt_connected = true;
 static int utransition;
 
 static uint16_t demo_ctr = 0; //demo mode, use 1 to activate
+static bool flashctr = false;
 
 static char conditions_buffer[32];
 static char temperature_buffer[8];
+
 #define P_CBUFFER (123411)
 #define P_TBUFFER (123412)
 
@@ -73,10 +75,20 @@ static void update_layer_fg(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack); //border
   //graphics_fill_circle(ctx, GPoint(72, 84), 62);
   
-  graphics_fill_rect(ctx, GRect(14,53,144-28,168-106), 10, GCornersAll);
+  graphics_fill_rect(ctx, GRect(14,53,144-28,168-106), 12, GCornersAll);
   
   graphics_context_set_fill_color(ctx, GColorWhite);
-  //graphics_fill_circle(ctx, GPoint(72, 84), 60); //circle
+  
+  GColor8 bt_color = GColorCeleste;
+  if (!bt_connected){
+    if (flashctr){
+      bt_color = GColorCeleste;
+    }else{
+      bt_color = GColorCobaltBlue;
+    }
+    flashctr = !flashctr;
+    graphics_context_set_fill_color(ctx, bt_color);
+  }
   
   graphics_fill_rect(ctx, GRect(16,55,144-32,168-110), 10, GCornersAll);
   
@@ -89,9 +101,12 @@ static void update_layer_fg(Layer *layer, GContext *ctx) {
     graphics_context_set_fill_color(ctx, GColorGreen); 
   }
   graphics_fill_rect(ctx, GRect(32,50,bar_length,5), 2, GCornersAll);
-  text_layer_set_text(s_bt_layer, "");
+  
   if (!bt_connected){
-    text_layer_set_text(s_bt_layer, "no bt");
+    text_layer_set_text_color(s_bt_layer, bt_color);
+    text_layer_set_text(s_bt_layer, "disconnected");
+  }else{
+    text_layer_set_text(s_bt_layer, "");
   }
 }
 
@@ -160,7 +175,6 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     unknowngfx_update(layer, ctx, utransition);
     utransition = utransition - 5;
   }
-  
   //test:
   //mistgfx_update(layer, ctx); //mist
   //raingfx_update(layer, ctx); //rain
@@ -196,7 +210,7 @@ static void main_window_load(Window *window) {
   s_bt_layer = text_layer_create(GRect(0, 32, 144, 50));
   text_layer_set_background_color(s_bt_layer, GColorClear);
   text_layer_set_text_color(s_bt_layer, GColorBlack);
-  text_layer_set_text(s_bt_layer, "no bt");
+  text_layer_set_text(s_bt_layer, "");
   text_layer_set_text_alignment(s_bt_layer, GTextAlignmentCenter);
 
   //Apply to TextLayer
@@ -218,7 +232,7 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_weather_layer, GColorClear);
   text_layer_set_text_color(s_weather_layer, GColorBlack);
   text_layer_set_text_alignment(s_weather_layer, GTextAlignmentRight);
-  text_layer_set_text(s_weather_layer, "wait");
+  text_layer_set_text(s_weather_layer, "...");
   
   text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
@@ -235,24 +249,6 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_weather_layer);
   text_layer_destroy(s_bt_layer);
-}
-
-static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
-  layer_mark_dirty(s_fg_layer);
-  
-  // Get weather update every 30 minutes
-  if(tick_time->tm_min % 30 == 0) {
-    // Begin dictionary
-    DictionaryIterator *iter;
-    app_message_outbox_begin(&iter);
-
-    // Add a key-value pair
-    dict_write_uint8(iter, 0, 0);
-
-    // Send the message!
-    app_message_outbox_send();
-  }
 }
 
 static void battery_handler(BatteryChargeState charge){
@@ -339,7 +335,6 @@ static void init() {
   window_stack_push(s_main_window, true);
   
   // Register with TickTimerService
-  //tick_timer_service_subscribe(MINUTE_UNIT, tick_handler); //not working
   tick_timer_service_subscribe(SECOND_UNIT, fg_invalidate);
   
   battery_state_service_subscribe(battery_handler);
