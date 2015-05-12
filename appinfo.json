@@ -1,6 +1,7 @@
 {
     "appKeys": {
         "KEY_CONDITIONS": 1,
+        "KEY_ID": 2,
         "KEY_TEMPERATURE": 0
     },
     "capabilities": [
@@ -30,7 +31,7 @@
         "basalt"
     ],
     "uuid": "29cd47e2-41ca-4024-b500-7f1e6382b5fe",
-    "versionLabel": "1.14",
+    "versionLabel": "1.15",
     "watchapp": {
         "watchface": true
     }

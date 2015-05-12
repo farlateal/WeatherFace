@@ -8,6 +8,7 @@
   
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
+#define KEY_ID 2
 #define DEMO_FRAMES (6)
   
 static Window *s_main_window;
@@ -29,10 +30,12 @@ static uint16_t demo_ctr = 0; //demo mode, use 1 to activate
 static bool flashctr = false;
 
 static char conditions_buffer[32];
+static int32_t id_buffer;
 static char temperature_buffer[8];
 
-#define P_CBUFFER (123411)
-#define P_TBUFFER (123412)
+#define P_CBUFFER (0)
+#define P_TBUFFER (1)
+#define P_IBUFFER (2)
   
 #define WEATHER_ITER_MAX (1200) //seconds between weather updates
 
@@ -284,22 +287,27 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   while(t != NULL) {
     // Which key was received?
     switch(t->key) {
-    case KEY_TEMPERATURE:
-      if(clock_is_24h_style() == false) { // I'll just go ahead and presume you want fahrenheit if you want 12h :)
-        int32_t temp = (int)t->value->int32;
-        int32_t fahrenheit = (int)((float)temp * (9.0/5.0) + 32.0);
-        snprintf(temperature_buffer, sizeof(temperature_buffer), "%dF", (int)fahrenheit);
-      }else{
-        snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
-      }
-      break;
-    case KEY_CONDITIONS:
-      snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
-      break;
-    default:
-      APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
-      break;
+      case KEY_TEMPERATURE:
+        if(clock_is_24h_style() == false) { // I'll just go ahead and presume you want fahrenheit if you want 12h :)
+          int32_t temp = (int)t->value->int32;
+          int32_t fahrenheit = (int)((float)temp * (9.0/5.0) + 32.0);
+          snprintf(temperature_buffer, sizeof(temperature_buffer), "%dF", (int)fahrenheit);
+        }else{
+          snprintf(temperature_buffer, sizeof(temperature_buffer), "%dC", (int)t->value->int32);
+        }
+        break;
+      case KEY_CONDITIONS:
+        snprintf(conditions_buffer, sizeof(conditions_buffer), "%s", t->value->cstring);
+        break;
+      case KEY_ID:
+        id_buffer = (int)t->value->int32;
+        break;
+      default:
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+        break;
     }
+    
+    raingfx_classify(id_buffer);
 
     // Look for next item
     t = dict_read_next(iterator);
@@ -366,12 +374,14 @@ static void init() {
   if (persist_exists(P_TBUFFER)) {
     persist_read_string(P_CBUFFER, conditions_buffer, sizeof(conditions_buffer));
     persist_read_string(P_TBUFFER, temperature_buffer, sizeof(temperature_buffer));
+    id_buffer = persist_read_int(P_IBUFFER);
   }
 }
 
 static void deinit() {
   persist_write_string(P_CBUFFER, conditions_buffer);
   persist_write_string(P_TBUFFER, temperature_buffer);
+  persist_write_int(P_IBUFFER, id_buffer);
   window_destroy(s_main_window);
 }
 
