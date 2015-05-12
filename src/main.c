@@ -23,6 +23,7 @@ bool charging = false;
 bool bt_connected = true;
 
 static int utransition;
+static int weatheriter = 0;
 
 static uint16_t demo_ctr = 0; //demo mode, use 1 to activate
 static bool flashctr = false;
@@ -32,6 +33,8 @@ static char temperature_buffer[8];
 
 #define P_CBUFFER (123411)
 #define P_TBUFFER (123412)
+  
+#define WEATHER_ITER_MAX (1200) //seconds between weather updates
 
 char* months[] = {"jan ", "feb ", "mar ", "apr ", "may ", "jun ", "jul ", "aug ", "sep ", "oct ", "nov ", "dec "};
 char* days[] = {"sun ", "mon ", "tue ", "wed ", "thu ", "fri ", "sat "};
@@ -111,6 +114,12 @@ static void update_layer_fg(Layer *layer, GContext *ctx) {
 }
 
 static void update_layer_bg(Layer *layer, GContext *ctx) {
+  weatheriter++;
+  if (weatheriter > WEATHER_ITER_MAX){
+    app_message_outbox_send();
+    weatheriter = 0;
+  }
+  
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_fill_circle(ctx, GPoint(72, 84), 55);
   graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
