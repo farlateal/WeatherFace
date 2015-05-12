@@ -125,6 +125,7 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
   
   //goto test;
+  
   if (demo_ctr > 0){
     if (demo_ctr < DEMO_FRAMES){
       raingfx_update(layer, ctx);
@@ -184,6 +185,7 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     unknowngfx_update(layer, ctx, utransition);
     utransition = utransition - 5;
   }
+  
   //test:
   //mistgfx_update(layer, ctx); //mist
   //raingfx_update(layer, ctx); //rain

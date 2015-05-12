@@ -1,11 +1,13 @@
 #include <pebble.h>
   
-#define CLOUDYGFX_NUM_CLOUDS (3)
 #define CLOUDYGFX_CLOUD_CIRCLES (10)
+#define CLOUDYGFX_MAX_CLOUDS (10)
+  
+static uint8_t CLOUDYGFX_NUM_CLOUDS = 3;
   
 static uint8_t cloudygfx_first = 1;
-static GPoint cloudygfx_clouds[CLOUDYGFX_NUM_CLOUDS * CLOUDYGFX_CLOUD_CIRCLES];
-static uint8_t cloudygfx_speeds[CLOUDYGFX_NUM_CLOUDS];
+static GPoint cloudygfx_clouds[CLOUDYGFX_MAX_CLOUDS * CLOUDYGFX_CLOUD_CIRCLES];
+static uint8_t cloudygfx_speeds[CLOUDYGFX_MAX_CLOUDS];
 
 static void cloudygfx_gencloud(){
   uint8_t i;
@@ -25,26 +27,23 @@ static void cloudygfx_gencloud(){
 static void cloudygfx_update(Layer *layer, GContext *ctx, uint8_t mode) {
   GColor8 cloud_color;
   
-  if (mode == 0){
+  if (mode == 0){ //light
     graphics_context_set_fill_color(ctx, GColorVividCerulean);
     cloud_color = GColorWhite;
-  }else if (mode < 3){
+    if (CLOUDYGFX_NUM_CLOUDS != 3){
+      CLOUDYGFX_NUM_CLOUDS = 3;
+      cloudygfx_first = 1;
+    }
+  }else if (mode < 3){ //heavy, thunder
+    graphics_context_set_fill_color(ctx, GColorCobaltBlue);
+    cloud_color = GColorLightGray;
+    if (CLOUDYGFX_NUM_CLOUDS != 7){
+      CLOUDYGFX_NUM_CLOUDS = 7;
+      cloudygfx_first = 1;
+    }
+  }else{ //night
     graphics_context_set_fill_color(ctx, GColorImperialPurple);
     cloud_color = GColorLightGray;
-  }else{
-    graphics_context_set_fill_color(ctx, GColorMidnightGreen);
-    cloud_color = GColorWhite;
-  }
-  
-  if (mode == 2){
-    if ((rand()%5) == 0){
-      graphics_context_set_fill_color(ctx, GColorWhite);
-      graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
-      uint8_t x = rand() % 144;
-      graphics_context_set_fill_color(ctx, GColorChromeYellow);
-      graphics_fill_rect(ctx, GRect(x,0,5,168), 0, GCornerNone);
-      return;
-    }
   }
   
   graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
@@ -63,9 +62,19 @@ static void cloudygfx_update(Layer *layer, GContext *ctx, uint8_t mode) {
       uint8_t current_index = i * CLOUDYGFX_CLOUD_CIRCLES + j;
       cloudygfx_clouds[current_index].x += cloudygfx_speeds[i];
       if (move){
-        cloudygfx_clouds[current_index].x += -200;
+        cloudygfx_clouds[current_index].x += -230;
       }
       graphics_fill_circle(ctx, cloudygfx_clouds[current_index], 15);
+    }
+  }
+  
+  if (mode == 2){ //thunder animation
+    if ((rand()%8) == 0){
+      graphics_context_set_fill_color(ctx, GColorWhite);
+      graphics_fill_rect(ctx, GRect(0,0,144,168), 0, GCornerNone);
+      uint8_t x = rand() % 144;
+      graphics_context_set_fill_color(ctx, GColorChromeYellow);
+      graphics_fill_rect(ctx, GRect(x,0,5,168), 0, GCornerNone);
     }
   }
 }
