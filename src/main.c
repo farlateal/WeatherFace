@@ -191,6 +191,7 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
   
   //test:
   //mistgfx_update(layer, ctx); //mist
+  //raingfx_classify(302);
   //raingfx_update(layer, ctx); //rain
   //sunnygfx_update(layer, ctx, 0); //clear day
   //sunnygfx_update(layer, ctx, 1); //clear night
@@ -272,6 +273,12 @@ static void battery_handler(BatteryChargeState charge){
 }
 
 void bt_handler(bool connected) {
+  if (bt_connected == false){
+    text_layer_set_text(s_weather_layer, "...");
+    APP_LOG(APP_LOG_LEVEL_INFO, "BT reestablished!");
+    weatheriter = WEATHER_ITER_MAX - 10;
+  }
+    
   bt_connected = connected;
   layer_mark_dirty(s_fg_layer);
 }
