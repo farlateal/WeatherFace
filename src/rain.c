@@ -24,7 +24,7 @@ static void raingfx_update(Layer *layer, GContext *ctx) {
     case LIGHT_RAIN:
       raingfx_num = 15; raingfx_lengthx = 8; raingfx_lengthy = 10; break;
     case MOD_RAIN:
-      raingfx_num = 30; raingfx_lengthx = 8; raingfx_lengthy = 10; break;
+      raingfx_num = 25; raingfx_lengthx = 8; raingfx_lengthy = 10; break;
     case HEAVY_RAIN:
       raingfx_num = 60; raingfx_lengthx = 10; raingfx_lengthy = 12; break;
   }
