@@ -48,6 +48,53 @@ function locationSuccess(pos) {
       );
     }      
   );
+  
+  //Get forecast
+  url = "http://api.openweathermap.org/data/2.5/forecast?lat=" +
+      pos.coords.latitude + "&lon=" + pos.coords.longitude;
+  
+    xhrRequest(url, 'GET', 
+    function(responseText) {
+      var json = JSON.parse(responseText);
+      var str1 = JSON.stringify(json.list[1].rain, null, 2).replace("3h","threeh");
+      var json1 = JSON.parse(str1);
+      var str2 = JSON.stringify(json.list[2].rain, null, 2).replace("3h","threeh");
+      var json2 = JSON.parse(str2);
+      var str3 = JSON.stringify(json.list[3].rain, null, 2).replace("3h","threeh");
+      var json3 = JSON.parse(str3);
+      
+      var precip = Number(json1.threeh); //rain for next 3h
+      var precip2 = Number(json2.threeh); //rain for next 3-6h
+      var precip3 = Number(json3.threeh); //rain for next 6-9h
+      console.log("Precipitation for 9h " + precip);
+      
+      var preturn = 0;
+      if (!isNaN(precip)){
+        preturn = parseInt(precip*100);
+      }
+      if (!isNaN(precip2)){
+        preturn = preturn + parseInt(precip2*100);
+      }
+      if (!isNaN(precip3)){
+        preturn = preturn + parseInt(precip3*100);
+      }
+      
+      // Assemble dictionary using our keys
+      var dictionary = {
+        "KEY_PRECIP": preturn,
+      };
+
+      // Send to Pebble
+      Pebble.sendAppMessage(dictionary,
+        function(e) {
+          console.log("Forecast info sent to Pebble successfully!");
+        },
+        function(e) {
+          console.log("Error sending forecast info to Pebble!");
+        }
+      );
+    }      
+  );
 }
 
 function locationError(err) {

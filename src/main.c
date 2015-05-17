@@ -9,6 +9,7 @@
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
 #define KEY_ID 2
+#define KEY_PRECIP 3
 #define DEMO_FRAMES (6)
   
 static Window *s_main_window;
@@ -18,10 +19,12 @@ static TextLayer *s_weather_layer;
 static TextLayer *s_bt_layer;
 static Layer *s_fg_layer;
 static Layer *s_bg_layer;
+static BitmapLayer *s_umbrella_layer;
 
 static uint8_t percent = 0;
 bool charging = false;
 bool bt_connected = true;
+bool has_umbrella = false;
 
 static int utransition;
 static int weatheriter = 0;
@@ -32,6 +35,9 @@ static bool flashctr = false;
 static char conditions_buffer[32];
 static int32_t id_buffer;
 static char temperature_buffer[8];
+static int32_t precip_buffer = 0;
+
+static GBitmap *umbrella;
 
 #define P_CBUFFER (0)
 #define P_TBUFFER (1)
@@ -77,6 +83,18 @@ static void update_time() {
   text_layer_set_text(s_date_layer, datebuffer);
 }
 
+static void remove_umbrella(){
+  if (!has_umbrella){return;}
+  bitmap_layer_set_bitmap(s_umbrella_layer, NULL);
+  has_umbrella = false;
+}
+
+static void place_umbrella(){
+  if (has_umbrella){return;}
+  bitmap_layer_set_bitmap(s_umbrella_layer, umbrella);
+  has_umbrella = true;
+}
+
 static void update_layer_fg(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorBlack); //border
   //graphics_fill_circle(ctx, GPoint(72, 84), 62);
@@ -101,7 +119,7 @@ static void update_layer_fg(Layer *layer, GContext *ctx) {
   //battery bar
   uint8_t bar_length = (percent / 5) * 4;
   graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, GRect(31,49,82,7), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(31,48,82,9), 2, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   if (charging){
     graphics_context_set_fill_color(ctx, GColorGreen); 
@@ -189,6 +207,12 @@ static void update_layer_bg(Layer *layer, GContext *ctx) {
     utransition = utransition - 5;
   }
   
+  if (precip_buffer != 0){
+    place_umbrella();
+  }else{
+    remove_umbrella();
+  }
+  
   //test:
   //mistgfx_update(layer, ctx); //mist
   //raingfx_classify(302);
@@ -252,6 +276,10 @@ static void main_window_load(Window *window) {
   text_layer_set_font(s_weather_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18));
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_weather_layer));
   
+  umbrella = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_UMBRELLA);
+  s_umbrella_layer = bitmap_layer_create(GRect(72-8, 26+115-8, 17, 17));
+  layer_add_child(s_bg_layer, bitmap_layer_get_layer(s_umbrella_layer));
+  
   // Make sure the time is displayed from the start
   update_time();
 }
@@ -309,6 +337,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       case KEY_ID:
         id_buffer = (int)t->value->int32;
         break;
+      case KEY_PRECIP:
+        precip_buffer = (int)t->value->int32;
+        APP_LOG(APP_LOG_LEVEL_ERROR, "Precip %d!", (int)precip_buffer);
+        break;
       default:
         APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
         break;
@@ -328,6 +360,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
   APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+  weatheriter = WEATHER_ITER_MAX - 10;
 }
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
@@ -346,7 +379,7 @@ static void fg_invalidate(struct tm *tick_time, TimeUnits units_changed) {
   //layer_mark_dirty(s_fg_layer);
   layer_mark_dirty(s_bg_layer);
 }
-  
+
 static void init() {
   // Create main Window element and assign to pointer
   s_main_window = window_create();
