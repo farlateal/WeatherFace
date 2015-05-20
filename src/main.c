@@ -24,7 +24,7 @@ static BitmapLayer *s_umbrella_layer;
 static uint8_t percent = 0;
 bool charging = false;
 bool bt_connected = true;
-bool has_umbrella = false;
+bool has_umbrella = true;
 
 static int utransition;
 static int weatheriter = 0;
@@ -42,6 +42,7 @@ static GBitmap *umbrella;
 #define P_CBUFFER (0)
 #define P_TBUFFER (1)
 #define P_IBUFFER (2)
+#define P_PBUFFER (3)
   
 #define WEATHER_ITER_MAX (1200) //seconds between weather updates
 
@@ -279,6 +280,7 @@ static void main_window_load(Window *window) {
   umbrella = gbitmap_create_with_resource(RESOURCE_ID_IMAGE_UMBRELLA);
   s_umbrella_layer = bitmap_layer_create(GRect(72-8, 26+115-8, 17, 17));
   layer_add_child(s_bg_layer, bitmap_layer_get_layer(s_umbrella_layer));
+  place_umbrella();
   
   // Make sure the time is displayed from the start
   update_time();
@@ -411,10 +413,16 @@ static void init() {
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
   
-  if (persist_exists(P_TBUFFER)) {
+  if (persist_exists(P_PBUFFER)) {
     persist_read_string(P_CBUFFER, conditions_buffer, sizeof(conditions_buffer));
     persist_read_string(P_TBUFFER, temperature_buffer, sizeof(temperature_buffer));
     id_buffer = persist_read_int(P_IBUFFER);
+    precip_buffer = persist_read_int(P_PBUFFER);
+    
+    static char weather_layer_buffer[32];
+    snprintf(weather_layer_buffer, sizeof(weather_layer_buffer), "%s", temperature_buffer);
+    text_layer_set_text(s_weather_layer, weather_layer_buffer);
+    layer_mark_dirty(s_fg_layer);
   }
 }
 
@@ -422,6 +430,7 @@ static void deinit() {
   persist_write_string(P_CBUFFER, conditions_buffer);
   persist_write_string(P_TBUFFER, temperature_buffer);
   persist_write_int(P_IBUFFER, id_buffer);
+  persist_write_int(P_PBUFFER, precip_buffer);
   window_destroy(s_main_window);
 }
 
