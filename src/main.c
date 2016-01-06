@@ -97,6 +97,8 @@ static void place_umbrella(){
 }
 
 static void update_layer_fg(Layer *layer, GContext *ctx) {
+  precip_buffer = 1;
+  
   graphics_context_set_fill_color(ctx, GColorBlack); //border
   //graphics_fill_circle(ctx, GPoint(72, 84), 62);
   

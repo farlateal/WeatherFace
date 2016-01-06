@@ -14,15 +14,15 @@
     "resources": {
         "media": [
             {
-                "file": "images/umbrella4.png",
-                "name": "IMAGE_UMBRELLA",
-                "type": "png"
-            },
-            {
                 "file": "images/icon.png",
                 "menuIcon": true,
                 "name": "IMAGE_APP_ICON",
-                "type": "png"
+                "type": "bitmap"
+            },
+            {
+                "file": "images/umbrella4.png",
+                "name": "IMAGE_UMBRELLA",
+                "type": "bitmap"
             }
         ]
     },
@@ -32,7 +32,7 @@
         "basalt"
     ],
     "uuid": "29cd47e2-41ca-4024-b500-7f1e6382b5fe",
-    "versionLabel": "1.17",
+    "versionLabel": "1.18",
     "watchapp": {
         "watchface": true
     }
