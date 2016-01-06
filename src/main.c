@@ -327,7 +327,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Which key was received?
     switch(t->key) {
       case KEY_TEMPERATURE:
-        if(clock_is_24h_style() == false) { // I'll just go ahead and presume you want fahrenheit if you want 12h :)
+        if(clock_is_24h_style() == true) { // 24 hour clock with F, yay! :)
           int32_t temp = (int)t->value->int32;
           int32_t fahrenheit = (int)((float)temp * (9.0/5.0) + 32.0);
           snprintf(temperature_buffer, sizeof(temperature_buffer), "%dF", (int)fahrenheit);
