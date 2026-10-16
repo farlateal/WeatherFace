@@ -1,10 +1,10 @@
 #include <pebble.h>
-#include <rain.c>
-#include <sunny.c>
-#include <snow.c>
-#include <cloudy.c>
-#include <mist.c>
-#include <unknown.c>
+#include "rain.c"
+#include "sunny.c"
+#include "snow.c"
+#include "cloudy.c"
+#include "mist.c"
+#include "unknown.c"
   
 #define KEY_TEMPERATURE 0
 #define KEY_CONDITIONS 1
